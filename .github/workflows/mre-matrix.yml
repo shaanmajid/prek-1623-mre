@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         platform: ["linux/amd64", "linux/arm64"]
-        install_method: ["npm", "pip", "binary", "installer"]
+        install_method: ["pip", "binary", "installer"]
 
     steps:
       - name: Checkout
