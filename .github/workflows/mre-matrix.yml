@@ -1,0 +1,51 @@
+name: MRE Matrix
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+
+jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ["linux/amd64", "linux/arm64"]
+        install_method: ["npm", "pip", "binary", "installer"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Run MRE Matrix Slice
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          INSTALL_METHOD: ${{ matrix.install_method }}
+          PREK_VERSION: "0.3.2"
+          TIMEOUT_SECS: "90"
+          REPEATS: "1"
+          AUTO_REPEATS: "5"
+          RESULTS_DIR: "${{ github.workspace }}/results"
+        run: |
+          bash scripts/run_mre_matrix.sh
+
+      - name: Show CSV
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          INSTALL_METHOD: ${{ matrix.install_method }}
+        run: |
+          echo "### ${PLATFORM} / ${INSTALL_METHOD}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```csv' >> "$GITHUB_STEP_SUMMARY"
+          cat "results/${PLATFORM//\//-}_${INSTALL_METHOD}.csv" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: mre-${{ replace(matrix.platform, '/', '-') }}-${{ matrix.install_method }}
+          path: results/*.csv
