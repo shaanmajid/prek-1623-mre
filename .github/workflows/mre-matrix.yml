@@ -47,5 +47,5 @@ jobs:
       - name: Upload Results
         uses: actions/upload-artifact@v4
         with:
-          name: mre-${{ replace(matrix.platform, '/', '-') }}-${{ matrix.install_method }}
+          name: mre-${{ matrix.install_method }}-${{ matrix.platform == 'linux/amd64' && 'linux-amd64' || 'linux-arm64' }}
           path: results/*.csv
