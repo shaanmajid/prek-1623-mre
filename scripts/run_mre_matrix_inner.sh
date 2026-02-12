@@ -1,10 +1,11 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env sh
+set -eu
 
 : "${INSTALL_CMD:?INSTALL_CMD is required}"
 : "${PREK_CMD:?PREK_CMD is required}"
 : "${INSTALL_METHOD:?INSTALL_METHOD is required}"
 : "${PLATFORM:?PLATFORM is required}"
+: "${SAFE_PLATFORM:?SAFE_PLATFORM is required}"
 : "${SOURCES:?SOURCES is required}"
 : "${TIMEOUT_SECS:?TIMEOUT_SECS is required}"
 : "${REPEATS:?REPEATS is required}"
@@ -19,7 +20,7 @@ if ! sh -lc "$PREK_CMD --version" >/tmp/prek-version.out 2>/tmp/prek-version.err
   exit 3
 fi
 
-CSV_FILE="/results/${PLATFORM//\//-}_${INSTALL_METHOD}.csv"
+CSV_FILE="/results/${SAFE_PLATFORM}_${INSTALL_METHOD}.csv"
 printf "platform,install_method,source,iteration,selected_source,rc,uv_exec,link_type,uv_version,error_sig\n" > "$CSV_FILE"
 
 for src in $SOURCES; do

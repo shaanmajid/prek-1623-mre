@@ -47,6 +47,7 @@ case "$INSTALL_METHOD" in
 esac
 
 OUT_CSV="$RESULTS_DIR/${PLATFORM//\//-}_${INSTALL_METHOD}.csv"
+SAFE_PLATFORM="${PLATFORM//\//-}"
 
 docker run --platform "$PLATFORM" --rm \
   -w /tmp/node \
@@ -56,11 +57,12 @@ docker run --platform "$PLATFORM" --rm \
   -e PREK_CMD="$PREK_CMD" \
   -e INSTALL_METHOD="$INSTALL_METHOD" \
   -e PLATFORM="$PLATFORM" \
+  -e SAFE_PLATFORM="$SAFE_PLATFORM" \
   -e SOURCES="$SOURCES" \
   -e TIMEOUT_SECS="$TIMEOUT_SECS" \
   -e REPEATS="$REPEATS" \
   -e AUTO_REPEATS="$AUTO_REPEATS" \
   --entrypoint sh \
-  "$IMAGE" -c 'bash /scripts/run_mre_matrix_inner.sh'
+  "$IMAGE" -c 'sh /scripts/run_mre_matrix_inner.sh'
 
 echo "wrote $OUT_CSV"
