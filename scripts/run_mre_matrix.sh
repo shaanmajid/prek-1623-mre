@@ -3,12 +3,11 @@ set -euo pipefail
 
 PLATFORM="${PLATFORM:?PLATFORM is required}"
 INSTALL_METHOD="${INSTALL_METHOD:?INSTALL_METHOD is required}"
+UV_SOURCE="${UV_SOURCE:?UV_SOURCE is required}"
+ITERATION="${ITERATION:?ITERATION is required}"
 PREK_VERSION="${PREK_VERSION:-0.3.2}"
-IMAGE="${IMAGE:-node:24-alpine}"
+IMAGE="${IMAGE:-alpine:3.20}"
 TIMEOUT_SECS="${TIMEOUT_SECS:-90}"
-SOURCES="${SOURCES:-github pypi tuna aliyun tencent pip auto}"
-REPEATS="${REPEATS:-1}"
-AUTO_REPEATS="${AUTO_REPEATS:-5}"
 
 RESULTS_DIR="${RESULTS_DIR:-$PWD/results}"
 mkdir -p "$RESULTS_DIR"
@@ -46,8 +45,9 @@ case "$INSTALL_METHOD" in
     ;;
 esac
 
-OUT_CSV="$RESULTS_DIR/${PLATFORM//\//-}_${INSTALL_METHOD}.csv"
 SAFE_PLATFORM="${PLATFORM//\//-}"
+SAFE_SOURCE="${UV_SOURCE//\//-}"
+OUT_CSV="$RESULTS_DIR/${SAFE_PLATFORM}_${INSTALL_METHOD}_${SAFE_SOURCE}_${ITERATION}.csv"
 
 docker run --platform "$PLATFORM" --rm \
   -w /tmp/node \
@@ -58,10 +58,9 @@ docker run --platform "$PLATFORM" --rm \
   -e INSTALL_METHOD="$INSTALL_METHOD" \
   -e PLATFORM="$PLATFORM" \
   -e SAFE_PLATFORM="$SAFE_PLATFORM" \
-  -e SOURCES="$SOURCES" \
+  -e UV_SOURCE="$UV_SOURCE" \
+  -e ITERATION="$ITERATION" \
   -e TIMEOUT_SECS="$TIMEOUT_SECS" \
-  -e REPEATS="$REPEATS" \
-  -e AUTO_REPEATS="$AUTO_REPEATS" \
   --entrypoint sh \
   "$IMAGE" -c 'sh /scripts/run_mre_matrix_inner.sh'
 
